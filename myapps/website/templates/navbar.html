@@ -1,0 +1,36 @@
+<!-- Navbar with toggle button to control sidebar visibility -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <!-- Button to toggle the sidebar -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar"
+            aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand modern-fashion" href="#">二元交易</a>
+        <!-- Button to toggle the navbar collapse (for mobile) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- Navbar links -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link logout-link" href="{% url 'logout' %}">登出</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a href="{% url 'login' %}" class="nav-link login-link">登录</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'signup' %}" class="nav-link signup-link">注册</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="#">聯系客服</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

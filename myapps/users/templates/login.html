@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="card shadow-sm p-4 login-register-card">
+    <h2 class="mb-4 text-center">登录</h2>
+    <form id="formAuthentication" class="mb-6" method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+      {% for error in form.non_field_errors %}
+      <div class="text-danger">{{ error }}</div>
+      {% endfor %}
+      {% endif %}
+
+      {% for hidden in form.hidden_fields %}
+      <div class="text-danger">{{ hidden }}</div>
+      {% endfor %}
+
+      <div class="mb-4"> <!-- Adjusted margin for spacing -->
+        <label for="email" class="form-label">用户名</label>
+        <input type="text" class="form-control" id="email" name="username" placeholder="请输入用户名" autofocus>
+        {% if form.username.errors %}
+        <div class="text-danger"> {{ form.username.errors.as_ul }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-4 form-password-toggle"> <!-- Adjusted margin for spacing -->
+        <label class="form-label" for="password">密码</label>
+        <div class="input-group input-group-merge">
+          <input type="password" id="password" class="form-control" name="password" aria-describedby="password"
+            placeholder="请输入您的密碼" />
+        </div>
+        {% if form.password.errors %}
+        <div class="text-danger"> {{ form.password.errors.as_ul }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-4"> <!-- Adjusted margin for spacing -->
+        <div class="d-flex justify-content-between mt-4">
+          <div class="form-check mb-0 ms-2">
+            <input class="form-check-input" type="checkbox" id="remember-me">
+            <label class="form-check-label" for="remember-me">
+              记住我
+            </label>
+          </div>
+          <a href="#">
+            <span>忘记密码？</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="mb-4"> <!-- Adjusted margin for spacing -->
+        <button class="btn btn-primary d-grid w-100" type="submit">登录</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

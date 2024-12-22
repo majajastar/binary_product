@@ -1,0 +1,66 @@
+/* Target only the login/register card */
+.card.login-register-card {
+    max-width: 500px; /* Maximum width of the card */
+    margin: 0 auto; /* Center the card horizontally */
+    border-radius: 10px; /* Rounded corners */
+}
+
+/* Card body padding */
+.card.login-register-card .card-body {
+    padding: 2rem; /* Padding inside the card body */
+}
+
+/* Primary button styling */
+.card.login-register-card .btn-primary {
+    background-color: #007bff; /* Blue background */
+    border-color: #007bff; /* Matching border color */
+    color: white; /* Button text color */
+}
+
+.card.login-register-card .btn-primary:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    border-color: #004085; /* Darker border on hover */
+}
+
+/* Label styling */
+.card.login-register-card .form-group label {
+    font-weight: bold; /* Bold text for labels */
+}
+
+/* Error message styling */
+.card.login-register-card .text-danger {
+    font-size: 0.875rem; /* Smaller font size for error messages */
+    color: #dc3545; /* Red color for error text */
+}
+
+/* Checkbox and label styling */
+.card.login-register-card .form-check-label {
+    font-size: 0.875rem; /* Smaller font size for checkbox labels */
+}
+
+/* Input and select styling */
+.card.login-register-card input[type="text"],
+.card.login-register-card input[type="password"],
+.card.login-register-card input[type="email"],
+.card.login-register-card select,
+.card.login-register-card textarea {
+    padding: 0.5rem; /* Padding inside input fields */
+    border-radius: 5px; /* Rounded input corners */
+    border: 1px solid #ccc; /* Light gray border */
+    width: 100%; /* Full width of the parent container */
+    box-sizing: border-box; /* Ensure padding is included in width calculation */
+}
+
+.card.login-register-card input[type="text"]:focus,
+.card.login-register-card input[type="password"]:focus,
+.card.login-register-card input[type="email"]:focus,
+.card.login-register-card select:focus,
+.card.login-register-card textarea:focus {
+    border-color: #007bff; /* Blue border on focus */
+    outline: none; /* Remove default outline */
+}
+
+/* Checkbox styling */
+.card.login-register-card .form-check-input {
+    margin-top: 0.2rem; /* Small margin to align checkbox properly */
+}

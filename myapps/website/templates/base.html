@@ -1,0 +1,33 @@
+{% load static %}
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Project{% endblock %}</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+    <link href="{% static 'css/navbar.css' %}" rel="stylesheet">
+    <link href="{% static 'css/sidebar.css' %}" rel="stylesheet">
+    <link href="{% static 'css/account_styles.css' %}" rel="stylesheet">
+    
+</head>
+
+<body>
+    <!-- Top Navbar -->
+    {% include 'navbar.html' %}
+
+    <!-- Sidebar and Content Layout -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        {% include 'sidebar.html' %}
+        <!-- Main Content -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,86 @@
+.sidebar {
+    background: linear-gradient(135deg, rgba(3, 1, 38, 0.9), rgba(1, 51, 153, 0.9)); /* Transparent gradient background */
+    max-width: 200px; /* Sidebar width */
+    height: 100vh; /* Full height */
+    color: white; /* Text color */
+    padding-top: 20px; /* Padding on top */
+    width: 25%; /* Occupy only 50% of the screen width */
+    z-index: 1040; /* Ensure it stays above content */
+}
+
+.sidebar h5 {
+    margin-bottom: 1rem; /* Space below section headings */
+    font-size: 1.2rem; /* Adjust font size */
+    text-transform: uppercase; /* Uppercase headings */
+    letter-spacing: 0.05rem; /* Slight spacing between letters */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Underline effect */
+    padding-bottom: 5px; /* Space below the underline */
+}
+
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.8); /* Slightly faded text for links */
+    font-size: 1rem; /* Adjust link font size */
+    padding: 8px 16px; /* Add padding to links */
+    border-radius: 4px; /* Rounded corners */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth hover effect */
+}
+
+.sidebar .nav-link.active {
+    background-color: #007bff; /* Blue background for active link */
+    color: white; /* White text for active link */
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Light gray background on hover */
+    color: white; /* Brighten text on hover */
+}
+
+.sidebar .nav-item {
+    margin-bottom: 10px; /* Space between nav items */
+}
+
+
+/* Mobile Sidebar Styling (Collapsed) */
+@media (max-width: 992px) {
+    /* Sidebar positioning and styling */
+    
+    .sidebar-collapse {
+        position: absolute; /* Position it below the navbar */
+        background: linear-gradient(135deg, rgba(3, 1, 38, 0.9), rgba(1, 51, 153, 0.9)); /* Transparent gradient background */
+        max-width: 200px; /* Sidebar width */
+        height: 100vh; /* Full height */
+        color: white; /* Text color */
+        padding-top: 20px; /* Padding on top */
+        width: 25%; /* Occupy only 50% of the screen width */
+        left: 0; /* Align it to the left */
+        z-index: 1040; /* Ensure it stays above content */
+        transform: translateX(-100%); /* Initially off-screen */
+        transition: transform 0.3s ease; /* Smooth transition when toggling */
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3); /* Shadow for effect */
+    }
+
+
+    /* Ensure the sidebar is hidden initially */
+    .sidebar-collapse {
+        display: block;
+    }
+
+    .sidebar.show {
+        transform: translateX(0); /* Slide in the sidebar */
+    }
+
+    .sidebar .nav-item {
+        margin-bottom: 10px;
+    }
+
+    /* Adjust content margin on mobile */
+    .content {
+        margin-left: 10;
+        transition: margin-left 0.3s ease;
+    }
+
+    /* Shift content when sidebar is active */
+    .sidebar.show + .content {
+        margin-left: 75%; /* Shift content to the right when the sidebar is visible */
+    }
+}
