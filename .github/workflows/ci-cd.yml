@@ -67,7 +67,7 @@ jobs:
     # Deploy to EB
     - name: Init EB CLI
       run: |
-        eb init --platform python-3.9 --region ap-southeast-1 binary-product-dev
+        eb init --platform python-3.9 --region ap-southeast-1 binary-product
     - name: Choose EB Env
       run: |
         eb use binary-product-env
