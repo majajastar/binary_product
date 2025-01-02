@@ -23,21 +23,21 @@ def create_order(request):
             price = float(data.get('price'))  # Ensure price is a float
             action = data.get('action')
             direction = Order.BUY_UP if action == "buy_up" else Order.BUY_DOWN
-
+            quantity = data.get('quantity')
             # Check if user has enough funds
-            if user.funds < price:
+            if user.funds < price*quantity:
                 return JsonResponse({'success': False, 'error': '餘額不足'})
             # Deduct the price from the user's funds
             if direction == Order.BUY_UP:
-                user.funds -= price
+                user.funds -= price*quantity
             else:
-                user.funds += price
+                user.funds += price*quantity
             user.save()
             # Create an Order if the user has enough funds
             new_order = Order.objects.create(
                 user=user,
                 product=product_type,
-                quantity=1,
+                quantity=quantity,
                 direction=direction,
                 price=price,
                 settled_at=next_settlement_time,

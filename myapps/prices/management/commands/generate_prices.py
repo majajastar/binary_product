@@ -17,7 +17,7 @@ def simulate_stock_price(initial_price, mu, sigma, time_steps, dt=1):
         price = prices[-1] * np.exp((mu - 0.5 * sigma ** 2) * dt + sigma * epsilon[i] * np.sqrt(dt))
         prices.append(price)
     
-    return prices
+    return np.round(prices,6)
 
 class Command(BaseCommand):
     help = "Generate day and minute price data for a given date range and store it in the database."
@@ -53,10 +53,10 @@ class Command(BaseCommand):
                 timestamp = timezone.make_aware(timestamp)
 
             # Generate minute-based data for the day (MinutePrice)
-            minute_timestamps = pd.date_range(start=timestamp, periods=1441, freq='T')  # 1440 minutes in a day
+            minute_timestamps = pd.date_range(start=timestamp, periods=1441, freq='min')  # 1440 minutes in a day
 
-            mu = np.random.normal(day_return , day_return/10)
-            sigma = np.random.normal(day_volatility , day_volatility/10)
+            mu = np.random.normal(day_return , day_return)
+            sigma = np.random.normal(day_volatility , day_volatility)
 
             time_steps = 1441
 
@@ -78,8 +78,10 @@ class Command(BaseCommand):
                 price_next = minute_prices[i+1]
 
                 # Generate the high and low prices for the minute
-                high_minute = max(price,price_next) + max(np.random.normal(0, 0.003*price), 0)
-                low_minute = min(price,price_next) - max(np.random.normal(0, 0.003*price), 0)
+                middle = (price+price_next)/2
+                noise = day_return/144
+                high_minute = max(price,price_next) + max(np.random.normal(0, noise*middle), 0)
+                low_minute = min(price,price_next) - max(np.random.normal(0, noise*middle), 0)
                 #print ("X:", price, price_next, high_minute, low_minute)
                 high_minutes.append(high_minute)
                 low_minutes.append(low_minute)

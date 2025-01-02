@@ -1,6 +1,4 @@
 // Function to fetch new data and update the chart
-// Function to fetch new data and update the chart
-// Function to fetch new data and update the chart
 function fetchDataAndUpdateChart() {
     var productType = document.getElementById('product-info').getAttribute('data-product-type');
     fetch(`/get-product-data/${productType}/`)
@@ -15,17 +13,25 @@ function fetchDataAndUpdateChart() {
                 // Convert to local time by adjusting with timezone offset
                 return new Date(new Date(timestamp).getTime() - timezoneOffset).toISOString();
             });
-
-            var localTimerange = data["time_range"].map(function (timestamp) {
+            var localSecondTimestamps = data['time_60_seconds'].map(function (timestamp) {
                 // Convert to local time by adjusting with timezone offset
                 return new Date(new Date(timestamp).getTime() - timezoneOffset).toISOString();
             });
-            var timestamps = data['timestamps'];
+
+            var localTimeRange = data["time_range"].map(function (timestamp) {
+                // Convert to local time by adjusting with timezone offset
+                return new Date(new Date(timestamp).getTime() - timezoneOffset).toISOString();
+            });
+
+            var localTimeSecondRange = data["time_second_range"].map(function (timestamp) {
+                // Convert to local time by adjusting with timezone offset
+                return new Date(new Date(timestamp).getTime() - timezoneOffset).toISOString();
+            });
+
             var openPrices = data['open_prices'];
             var highPrices = data['high_prices'];
             var lowPrices = data['low_prices'];
             var closePrices = data['close_prices'];
-
             // Update the chart
             var trace = {
                 x: localTimestamps,  // Use localTimestamps for x-axis
@@ -35,33 +41,48 @@ function fetchDataAndUpdateChart() {
                 close: closePrices,
                 decreasing: { line: { color: '#dc3545' } },
                 increasing: { line: { color: '#28a745' } },
-                line: { 
-                    color: 'rgba(31,119,180,1)', 
+                line: {
+                    color: 'rgba(31,119,180,1)',
                     width: 1,
                 },
                 type: 'candlestick',
                 xaxis: 'x',
                 yaxis: 'y'
             };
-
+            var tickformat = '.6f'
+            if (data['digit'] === 8) {
+                tickformat = '.8f'
+            } else if (data['digit'] === 7) {
+                tickformat = '.7f'
+            } else if (data['digit'] === 6) {
+                tickformat = '.6f'
+            } else if (data['digit'] === 5) {
+                tickformat = '.5f'
+            } else if (data['digit'] === 4) {
+                tickformat = '.4f'
+            } else if (data['digit'] === 3) {
+                tickformat = '.3f'
+            } else {
+                tickformat = '.2f'
+            }
             var layout = {
                 dragmode: 'zoom',
                 margin: {
                     r: 10,
-                    t: 25,
-                    b: 40,
-                    l: 60
+                    t: 15,
+                    b: 30,
+                    l: 80
                 },
                 showlegend: false,
                 xaxis: {
                     autorange: false,
                     domain: [0, 1],
-                    range: localTimerange,
+                    range: localTimeRange,
                     type: 'date',
                     fixedrange: true,
                     rangeslider: {
                         visible: false,
-                        range: localTimerange
+                        range: localTimeRange
                     },
                 },
                 yaxis: {
@@ -69,15 +90,19 @@ function fetchDataAndUpdateChart() {
                     domain: [0, 1],
                     range: data["price_range"],
                     type: 'linear',
-                    fixedrange: true  // Prevent zooming on y-axis
+                    fixedrange: true,  // Prevent zooming on y-axis
+                    tickformat: tickformat,
+                    ticks: 'outside',  // Optional: place ticks outside for better visibility
+                    dtick: (data["price_range"][1] - data["price_range"][0]) / 6,  // Increase grid lines (10 grid lines)
+                    type: 'linear',
                 },
             };
 
             var lineData = {
                 x: localTimestamps,  // Use localTimestamps for x-axis
                 y: data['close_prices'],
-                line: { 
-                    color: 'rgb(46, 60, 255)', 
+                line: {
+                    color: 'rgb(46, 60, 255)',
                     width: 1,
                 },
                 type: 'scatter',
@@ -89,17 +114,64 @@ function fetchDataAndUpdateChart() {
                 displayModeBar: false
             };
 
-            Plotly.react('chart', [trace, lineData], layout, config);
+            Plotly.react('chart-minute', [trace, lineData], layout, config);
+
+            var lineDataInSeconds = {
+                x: localSecondTimestamps,  // Use localTimestamps for x-axis
+                y: data['price_60_second'],
+                line: {
+                    color: 'rgb(46, 60, 255)',
+                    width: 1,
+                },
+                type: 'scatter',
+                mode: 'lines',
+                name: '即時走勢(秒)'
+            };
+
+            var layoutInSecond = {
+                dragmode: 'zoom',
+                margin: {
+                    r: 10,
+                    t: 15,
+                    b: 30,
+                    l: 80
+                },
+                showlegend: false,
+                xaxis: {
+                    autorange: false,
+                    domain: [0, 1],
+                    range: localTimeSecondRange,
+                    type: 'date',
+                    fixedrange: true,
+                    rangeslider: {
+                        visible: false,
+                        range: localTimeSecondRange
+                    },
+                },
+                yaxis: {
+                    autorange: false,
+                    domain: [0, 1],
+                    range: data["price_second_range"],
+                    tickformat: tickformat,
+                    ticks: 'outside',  // Optional: place ticks outside for better visibility
+                    dtick: (data["price_second_range"][1] - data["price_second_range"][0]) / 6,  // Increase grid lines (10 grid lines)
+                    type: 'linear',
+                    fixedrange: true,  // Prevent zooming on y-axis
+                    showgrid: true,  // Ensure grid lines are visible
+                },
+            };
+
+            Plotly.react('chart-second', [lineDataInSeconds], layoutInSecond, config);
+
 
             // Update the latest prices
-            updateLatestPrices(closePrices, data['timestamps']);
+            updateLatestPrices(closePrices, data['timestamps'], data['time_60_seconds'][data['time_60_seconds'].length - 1  ], data['digit']);
             updateTransactionInfo(
-                closePrices[closePrices.length - 1].toFixed(2),
+                closePrices[closePrices.length - 1],
                 data['current_time'],
-                data['tag_price'].toFixed(2),
-                data['tag_time'],
                 data['next_settlement_time'],
                 data['order_deadline_time'],
+                data['digit'],
             )
         });
 }
@@ -108,6 +180,7 @@ function fetchOrderData() {
     var productType = document.getElementById('product-info').getAttribute('data-product-type');
     var page = document.getElementById('product-info').getAttribute('data-current-page');
     var current_price = document.getElementById('product-info').getAttribute('data-current-price');
+    var digit = document.getElementById('product-info').getAttribute('data-current-price-digit');
 
     fetch(`/get-order-data/${productType}/?page=${page}&current_price=${current_price}`)
         .then(response => response.json())
@@ -130,13 +203,14 @@ function fetchOrderData() {
                         row.innerHTML = `
                             <td>${order.id}</td>
                             <td>${order.product}</td>
-                            <td>$${order.price.toFixed(2)}</td>
+                            <td>$${order.price.toFixed(digit)}</td>
+                            <td>${order.quantity}</td>
                             <td>${order.direction}</td>
                             <td>${order.created_at}</td>
                             <td>${order.settled_at || "N/A"}</td>
                             <td>${order.settled_price || "N/A"}</td>
                             <td>${order.status}</td>
-                            <td style="color: ${profitColor}">${order.profit !== null ? `$${order.profit.toFixed(2)}` : "<span class='text-muted'>N/A</span>"}</td>
+                            <td style="color: ${profitColor}">${order.profit !== null ? `$${order.profit.toFixed(digit)}` : "<span class='text-muted'>N/A</span>"}</td>
                         `;
                         tableBody.appendChild(row);
                     }
@@ -153,27 +227,28 @@ function fetchOrderData() {
 
 
 // Function to update the latest 5 prices in the second card
-function updateLatestPrices(prices, timestamps) {
+function updateLatestPrices(prices, timestamps, current_time, digit) {
     const latestPricesList = document.getElementById('latest-prices');
     latestPricesList.innerHTML = ''; // Clear previous entries
 
     // Get the latest 5 prices
     const latestPrices = prices.slice(-5).reverse();
-    const latestTimestamps = timestamps.slice(-5).reverse();
-
+    var latestTimestamps = timestamps.slice(-4);
+    latestTimestamps.push(current_time);
+    latestTimestamps = latestTimestamps.reverse();
     latestPrices.forEach((price, index) => {
         const listItem = document.createElement('li');
         listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
         listItem.innerHTML = `
             <span>${new Date(latestTimestamps[index]).toLocaleString()}</span>
-            <span class="badge bg-primary rounded-pill">$${price.toFixed(2)}</span>
+            <span class="badge bg-primary rounded-pill">$${price.toFixed(digit)}</span>
         `;
         latestPricesList.appendChild(listItem);
     });
 }
 
 // Function to update the transaction info card with current price, time, and deadlines
-function updateTransactionInfo(currentPrice, currentTime, tagPrice, tagTime, settlementTime, orderDeadline) {
+function updateTransactionInfo(currentPrice, currentTime, settlementTime, orderDeadline, digit) {
     const settlementLocalTime = new Date(settlementTime).toLocaleTimeString();
     const orderDeadlineLocalTime = new Date(orderDeadline).toLocaleTimeString();
     const currentLocalTime = new Date(currentTime).toLocaleTimeString();
@@ -194,6 +269,7 @@ function updateTransactionInfo(currentPrice, currentTime, tagPrice, tagTime, set
 
     // Update the transaction info card
     document.getElementById('product-info').setAttribute('data-current-price', currentPrice);
+    document.getElementById('product-info').setAttribute('data-current-price-digit', digit);
     document.getElementById('current-price').textContent = `$${currentPrice}`;
     document.getElementById('current-time').textContent = currentLocalTime;
     document.getElementById('settlement-time').textContent = `${settlementLocalTime} -- (${timeToSettleMent})`;
@@ -205,8 +281,16 @@ function updateTransactionInfo(currentPrice, currentTime, tagPrice, tagTime, set
 // Reusable function to handle "Buy" actions
 function handleBuyAction(action) {
     const currentUser = "{{ user.username }}";  // Use Django template tag to pass current user
-    const productType = "productA";  // Adjust based on your product
+    const productType = "usd-eur";  // Adjust based on your product
     const currentPrice = document.getElementById('current-price').innerText.replace('$', ''); // Get the current price
+    var quantity = 100; // Default quantity
+    if (action === "buy_up") {
+        // Get the quantity from the buy-up input field
+        quantity = parseInt(document.getElementById("buy-up-quantity").value) || 100; // Default to 100 if the value is not a number
+    } else if (action === "buy_down") {
+        // Get the quantity from the buy-down input field
+        quantity = parseInt(document.getElementById("buy-down-quantity").value) || 100; // Default to 100 if the value is not a number
+    }
     // Make the AJAX request to create an order
     fetch('/create-order/', {
         method: 'POST',
@@ -219,6 +303,7 @@ function handleBuyAction(action) {
             product_type: productType,
             price: currentPrice,
             action: action,  // Dynamically pass 'buy_up' or 'buy_down'
+            quantity: quantity,
         })
     })
         .then(response => response.json())

@@ -6,17 +6,28 @@
 
 {% block content %}
 <script src="{% static 'js/product_price.js' %}"></script>
-<div id="product-info" data-product-type="{{ product_type }}" data-current-page="1" data-current-price="0"></div>
+<div id="product-info" data-product-type="{{ product_type }}" data-current-page="1" data-current-price="0" ,
+    data-current-price-digit="2"></div>
 <div class="container mt-4">
     <div class="row">
         <!-- Stock Chart Card -->
         <div class="col-lg-8">
-            <div class="card shadow-sm mb-4 w-100">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">價格走勢 ({{ product_type }})</h5>
+            <div class="container">
+                <div class="card shadow-sm mb-4 w-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">即時走勢 ({{ product_type }})</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-second" class="chart-container"></div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div id="chart" class="chart-container"></div>
+                <div class="card shadow-sm mb-4 w-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">價格走勢 ({{ product_type }})</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="chart-minute" class="chart-container"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -28,27 +39,41 @@
                     <h5 class="mb-0">最新價格</h5>
                 </div>
                 <div class="card-body">
-                    <ul id="latest-prices" class="list-group">
-                        <!-- Dynamic list of prices will be inserted here -->
-                    </ul>
+                    <div class="price-container">
+                        <ul id="latest-prices" class="list-group ">
+                            <!-- Dynamic list of prices will be inserted here -->
+                        </ul>
+                    </div>
                 </div>
             </div>
 
-            <!-- Transaction Info Card -->
-            <div class="card shadow-lg border-0 mb-3">
-                <div class="card-body text-center p-4">
-                    <h5 class="card-title text-primary mb-3">交易資訊</h5>
-                    <p class="card-text mb-1 text-muted">
-                        當前價格: <span id="current-price" class="text-success">$0.00</span> (<span
-                            id="current-time">--:--</span>)
-                    </p>
-                    <p class="card-text text-muted">
-                        下單截止時間: <span id="order-deadline">--:--</span><br>
-                        下次結算時間: <span id="settlement-time">--:--</span>
-                    </p>
-                    <div class="d-flex justify-content-center mt-3">
-                        <button id="buy-up" class="btn btn-success me-3 px-4 py-2 rounded-pill shadow-sm" onclick="handleBuyAction('buy_up')">買漲</button>
-                        <button id="buy-down" class="btn btn-danger px-4 py-2 rounded-pill shadow-sm" onclick="handleBuyAction('buy_down')">買跌</button>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">交易資訊</h5>
+                </div>
+                <div class="trade-container">
+                    <div class="card-body text-center">
+                        <p class="card-text mb-1 text-muted">
+                            當前價格: <span id="current-price" class="text-success">$0.00</span> (<span
+                                id="current-time">--:--</span>)
+                        </p>
+                        <p class="card-text text-muted">
+                            下單截止時間: <span id="order-deadline">--:--</span><br>
+                            下次結算時間: <span id="settlement-time">--:--</span>
+                        </p>
+                        <div class="d-flex justify-content-center mt-3">
+                            <button id="buy-up" class="btn btn-success px-4 py-2 rounded-pill shadow-sm"
+                                onclick="handleBuyAction('buy_up')">買漲</button>
+                            <input type="number" id="buy-up-quantity" class="form-control w-auto" value="1000" min="1000" />
+                            <span class="input-group-text">單位</span>
+                        </div>
+                        <div class="d-flex justify-content-center mt-3">
+                            <button id="buy-down" class="btn btn-danger px-4 py-2 rounded-pill shadow-sm"
+                                onclick="handleBuyAction('buy_down')">買跌</button>
+                            <input type="number" id="buy-down-quantity" class="form-control w-auto" value="1000"
+                                min="1000" />
+                            <span class="input-group-text">單位</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -70,6 +95,7 @@
                                 <th>訂單編號</th>
                                 <th>產品名稱</th>
                                 <th>價格</th>
+                                <th>數量</th>
                                 <th>方向</th>
                                 <th>下單時間</th>
                                 <th>結算時間</th>
@@ -81,8 +107,8 @@
                         <tbody>
                         </tbody>
                     </table>
-                    
-    
+
+
                     <!-- Pagination Controls -->
                     <div class="pagination-controls">
                         <button id="previous-page" onclick="fetchOrderDataByPrevPage()" disabled>Previous</button>
