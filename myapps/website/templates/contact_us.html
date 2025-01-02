@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center text-primary mb-4">聯繫我們</h2>
+
+    <p class="text-center">我們的客服團隊將會盡快回覆您。請選擇以下聯繫方式與我們聯繫。</p>
+
+    <!-- Line IDs -->
+    <div class="text-center mt-4">
+        <h5>聯繫我們的 Line ID</h5>
+
+        <div class="container" style="height: 70vh; display: flex; flex-direction: column; justify-content: flex-start; align-items: center;">
+            {% for contact in latest_contacts %}
+            <!-- First Card Component -->
+            <div class="card" style="width: 100%; max-width: 400px; background-color: #003366; color: white; margin-bottom: 20px;">
+                <div class="card-body">
+                    <!-- Row with WeChat Icon and Text to the left -->
+                    <div class="d-flex align-items-center">
+                        <!-- WeChat Icon (bi-line) with green background -->
+                        <i class="bi bi-line" style="font-size: 1.5rem; margin-right: 10px; background-color: green; padding: 5px; border-radius: 50%;"></i>
+                        <!-- Text next to the WeChat Icon -->
+                        <span id="contact-id-{{ contact.id }}" style="font-size: 1.25rem;">{{ contact.contact_id }}</span>
+
+                        <!-- Container for IconB (copy) and IconC (arrow), aligned to the right -->
+                        <div class="d-flex align-items-center ms-auto">
+                            <!-- IconB (for copy) -->
+                            <i class="bi bi-copy icon-hover" style="font-size: 1.5rem; margin-left: 10px; caret-color: transparent;" onclick="copyContactId('{{ contact.id }}')"></i>
+                            <!-- IconC (for arrow), which redirects to the Line page -->
+                            <i class="bi bi-arrow-right-square icon-hover" style="font-size: 1.5rem; margin-left: 10px; caret-color: transparent;" onclick="redirectToLinePage('{{ contact.contact_url }}')"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                <li>目前沒有可用的聯繫方式。</li>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Add the following JavaScript to handle copying and redirection -->
+<script>
+    function copyContactId(contactId) {
+        // Get the text of the contact ID using the ID of the span
+        var contactText = document.getElementById('contact-id-' + contactId).textContent;
+
+        // Create a temporary input element to copy the text
+        var tempInput = document.createElement('input');
+        tempInput.value = contactText;
+        document.body.appendChild(tempInput);
+        
+        // Select the text and copy it to the clipboard
+        tempInput.select();
+        document.execCommand('copy');
+        
+        // Remove the temporary input element
+        document.body.removeChild(tempInput);
+
+        // Optionally, show a success message (you can replace this with any UI feedback you want)
+        alert("已複製 ID: " + contactText);
+    }
+
+    // Redirect to Line page for the contact ID
+    function redirectToLinePage(contactUrl) {
+        // Replace this URL with the actual URL for the Line page for that specific contact ID
+        window.location.href = contactUrl;
+    }
+</script>
+
+<style>
+    /* Hover effect for the copy and arrow icons */
+    .icon-hover {
+        transition: transform 0.2s ease, color 0.2s ease; /* Smooth transition for scale and color */
+    }
+
+    .icon-hover:hover {
+        color: #28a745; /* Change the color to green when hovered */
+        transform: scale(1.3); /* Enlarge the icon when hovered */
+        cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
+    }
+</style>
+{% endblock %}

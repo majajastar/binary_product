@@ -7,6 +7,7 @@ from django.utils import timezone
 from myapps.prices.models import MinutePrice
 from myapps.orders.models import Order
 from django.core.paginator import Paginator
+from .models import ContactMethod
 from myapps.prices.management.commands.generate_prices import simulate_stock_price
 
 # Generate random stock data
@@ -152,5 +153,18 @@ def get_product_data(request, product_type):
 def product_page(request, product_type="ProductA"):
     current_time = timezone.now()
     data = get_60_minute_data(current_time, product_type)
-    
-    return render(request, 'product.html', {'data': data, 'product_type':product_type})
+    name = "二元智选"
+
+    return render(request, 'product.html', {'name': name, 'data': data, 'product_type':product_type})
+
+def about_us(request):
+    name = "二元智选"
+
+    return render(request, 'about_us.html', {'name': name})
+
+def contact_us(request):
+    name = "二元智选"
+    # Query the latest 3 ContactMethod entries ordered by their ID (descending)
+    latest_contacts = ContactMethod.objects.all().order_by('-id')[:3]
+
+    return render(request, 'contact_us.html', {'name': name, 'latest_contacts': latest_contacts})

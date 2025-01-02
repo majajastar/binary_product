@@ -1,12 +1,15 @@
 /* navbar.css */
 .navbar {
-    background: linear-gradient(135deg, #001f3d, #cddff1); /* dark blue gradient */
+    background: linear-gradient(135deg, #014b96, #6d91b3);
+    caret-color: transparent;
+    /* dark blue gradient */
 }
 
 .navbar .navbar-brand,
 .navbar .nav-link {
     color: white;
 }
+
 
 .navbar .nav-link:hover {
     color: #f8f9fa;
@@ -16,41 +19,107 @@
 
 /* Default behavior: Align items to the right for larger screens */
 .navbar-nav {
-    margin-left: auto; /* This is equivalent to ms-auto in Bootstrap */
+    margin-left: auto;
+    /* This is equivalent to ms-auto in Bootstrap */
 }
 
+.navbar-toggler-icon {
+    background-image: none!important;
+    background-color: var(--bs-gray-800);
+    height: 3px;
+    width: 25px;
+    margin: 10px 0;
+    position: relative;
+    transition: all 0.35s ease-out;
+    transform-origin: center;
+  }
+  
+  .navbar-toggler-icon::before {
+    display: block;
+    background-color: var(--bs-gray-800);
+    height: 3px;
+    content: "";
+    position: relative;
+    top: -7px;
+    transition: all 0.15s ease-out;/*taken down to hide quicker*/
+    transform-origin: center;
+  }
+  
+  .navbar-toggler-icon::after {
+    display: block;
+    background-color: var(--bs-gray-800);
+    height: 3px;
+    content: "";
+    position: relative;
+    top: 4px;
+    transition: all 0.35s ease-out;
+    transform-origin: center;
+  }
+  
+  .navbar-dark .navbar-toggler-icon,
+  .navbar-dark .navbar-toggler-icon::before,
+  .navbar-dark .navbar-toggler-icon::after {
+    background-color: var(--bs-gray-100);
+  }
+  
+  .navbar-toggler:not(.collapsed) .navbar-toggler-icon {
+    transform: rotate(45deg);
+  }
+  
+  .navbar-toggler:not(.collapsed) .navbar-toggler-icon::before {
+    opacity: 0;
+  }
+  
+  .navbar-toggler:not(.collapsed) .navbar-toggler-icon::after {
+    transform: rotate(-90deg) translateX(7px);
+  }
+
 @media (max-width: 992px) {
+
     /* Adjust navbar-collapse to occupy the full height below navbar */
     .navbar-collapse {
-        position: absolute; /* Position it below the navbar */
-        top: 100%; /* Align it directly below the navbar */
-        right: 0; /* Align it to the right */
-        width: 50%; /* Occupy only 50% of the screen width */
-        height: 100vh; /* Full height of the screen */
-        background: linear-gradient(135deg, rgba(3, 1, 38, 0.9), rgba(163, 192, 248, 0.9)); /* Transparent gradient background */
-        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2); /* Shadow for separation */
-        transform: translateX(100%); /* Initially hidden off-screen */
-        transition: transform 0.3s ease; /* Smooth slide-in effect */
-        z-index: 1050; /* Ensure it stays above other content */
+        position: absolute;
+        /* Position it below the navbar */
+        top: 100%;
+        /* Align it directly below the navbar */
+        right: 0;
+        /* Align it to the right */
+        width: 100px;
+        /* Occupy only 50% of the screen width */
+        background: linear-gradient(135deg, #014b96, #6d91b3);
+        /* dark blue gradient */
+        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+        /* Shadow for separation */
+        transform: translateX(100%);
+        /* Initially hidden off-screen */
+        transition: transform 0.3s ease;
+        /* Smooth slide-in effect */
+        z-index: 1050;
+        /* Ensure it stays above other content */
         display: flex;
-        justify-content: center;  /* Center links horizontally */
-        align-items: flex-start;  /* Align links to the top */
+        justify-content: center;
+        /* Center links horizontally */
+        align-items: flex-start;
+        /* Align links to the top */
     }
 
     /* Show the navbar-collapse when toggled */
     .navbar-collapse.show {
-        transform: translateX(0); /* Slide in from the right */
+        transform: translateX(0);
+        /* Slide in from the right */
     }
 
     /* Navbar toggler button to stay above the navbar-collapse */
     .navbar-toggler {
         position: relative;
-        z-index: 1100; /* Higher z-index to stay above the navbar-collapse */
+        z-index: 1100;
+        /* Higher z-index to stay above the navbar-collapse */
     }
 
     /* For mobile screens (max-width 992px), remove ms-auto */
     .navbar-nav {
-        margin-left: 0; /* Remove the margin-left for mobile screens */
+        margin-left: 0;
+        /* Remove the margin-left for mobile screens */
     }
 }
 

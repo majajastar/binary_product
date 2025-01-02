@@ -1,21 +1,34 @@
 <!-- Sidebar with collapse functionality -->
-<div class="sidebar p-3 sidebar-collapse" id="sidebar">
+<div class="sidebar p-4 sidebar-collapse" id="sidebar">
+    {% if user.is_authenticated %}
+    <h5 class="font-weight-bold mb-3 mt-4">個人資料</h5>
+    <div class="nav-item">
+        <!-- Display user funds -->
+        <p class="" style="font-size: 1rem;">用戶: <span class="font-italic">{{ user.username }}</span></p>
+        <p class="" style="font-size: 1rem;">餘額: <span class="font-weight-bold text-success">${{ user.funds }}</span></p>
+    </div>
+    {% endif %}
     <!-- Product Section -->
-    <h5 class="text-white">產品</h5>
+    <h5 class="font-weight-bold mb-4">產品</h5>
     <ul class="nav flex-column">
         <li class="nav-item">
             <a class="nav-link {% if product_type == 'productA' %}active{% endif %}"
-                href="{% url 'product_page' product_type='productA' %}">產品A</a>
+                href="{% url 'product_page' product_type='productA' %}">
+                產品A
+            </a>
         </li>
         <li class="nav-item">
             <a class="nav-link {% if product_type == 'productB' %}active{% endif %}"
-                href="{% url 'product_page' product_type='productB' %}">產品B</a>
+                href="{% url 'product_page' product_type='productB' %}">
+                產品B (建構中)
+            </a>
         </li>
     </ul>
-    {% if user.is_authenticated %}
-    <h5 class="text-white">個人資料</h5>
-    <!-- Display user funds -->
-    <p class="text-white">用戶: {{ user.username }}</p>
-    <p class="text-white">餘額: ${{ user.funds }}</p>
-    {% endif %}
+    <h5 class="font-weight-bold mb-3 mt-4"></h5>
+    <div class="nav-item">
+        <a class="nav-link" href="{% url 'contact_us' %}">充值/聯系客服</a>
+        <!-- Display user funds -->
+        <a class="nav-link" href="/">回到主頁</a>
+    </div>
+    
 </div>

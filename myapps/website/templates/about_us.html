@@ -1,0 +1,38 @@
+{% load static %}
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{name}} - 智能选择，无限可能</title>
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>{{name}}</h1>
+        <p>智能选择，无限可能</p>
+    </header>
+    <section class="hero">
+        <h2>开启智慧之旅，从此简单选择</h2>
+    </section>
+    <section id="features" class="features">
+        <div class="feature">
+            <h3>快速决策</h3>
+            <p>通过智能算法，为您提供最优解。</p>
+        </div>
+        <div class="feature">
+            <h3>安全可靠</h3>
+            <p>数据加密保护，保障您的隐私。</p>
+        </div>
+        <div class="feature">
+            <h3>高效便捷</h3>
+            <p>简单界面，轻松操作。</p>
+        </div>
+    </section>
+    <div class="cta">
+        <button onclick="location.href='{% url 'product_page_default' %}'">立即开始交易</button>
+    </div>
+    <footer>
+        <p>&copy; 2025 {{name}}. 保留所有权利。</p>
+    </footer>
+</body>
+</html>
