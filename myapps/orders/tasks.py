@@ -43,7 +43,10 @@ def check_and_settle_orders():
         if order.direction == order.BUY_UP:
             user.funds += order.settled_price
         else:
-            user.funds -= order.settled_price
+            profit = (order.price - order.settled_price) * quantity
+            user.security_deposit -= order.price*quantity
+            user.funds += order.price*quantity
+            user.fund += profit
         order.status = Order.COMPLETED  # Set to settle
         order.save()
 

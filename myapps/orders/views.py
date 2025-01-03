@@ -31,7 +31,8 @@ def create_order(request):
             if direction == Order.BUY_UP:
                 user.funds -= price*quantity
             else:
-                user.funds += price*quantity
+                user.security_deposit += price*quantity
+                user.funds -= price*quantity
             user.save()
             # Create an Order if the user has enough funds
             new_order = Order.objects.create(
