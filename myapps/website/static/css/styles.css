@@ -205,15 +205,15 @@ footer p {
     }
 
     .chart-container {
-        height: 10vh;
+        height: 250px;
         /* Set to your desired height for mobile */
     }
 
     .price-container {
-        height: 10vh;
+        height: 250px;
     }
 
     .trade-container {
-        height: 10vh;
+        height: 250px;
     }
 }

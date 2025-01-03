@@ -1,4 +1,10 @@
+// Function to determine tick font size based on screen width
+function getTickFontSize() {
+    return window.innerWidth < 992 ? 8 : 12; // Smaller font for screens narrower than 600px
+}
+
 // Function to fetch new data and update the chart
+
 function fetchDataAndUpdateChart() {
     var productType = document.getElementById('product-info').getAttribute('data-product-type');
     fetch(`/get-product-data/${productType}/`)
@@ -80,6 +86,9 @@ function fetchDataAndUpdateChart() {
                     range: localTimeRange,
                     type: 'date',
                     fixedrange: true,
+                    tickfont: {
+                        size: getTickFontSize() // X-axis label font size
+                    },
                     rangeslider: {
                         visible: false,
                         range: localTimeRange
@@ -93,6 +102,9 @@ function fetchDataAndUpdateChart() {
                     fixedrange: true,  // Prevent zooming on y-axis
                     tickformat: tickformat,
                     ticks: 'outside',  // Optional: place ticks outside for better visibility
+                    tickfont: {
+                        size: getTickFontSize() // X-axis label font size
+                    },
                     dtick: (data["price_range"][1] - data["price_range"][0]) / 6,  // Increase grid lines (10 grid lines)
                     type: 'linear',
                 },
@@ -142,6 +154,9 @@ function fetchDataAndUpdateChart() {
                     domain: [0, 1],
                     range: localTimeSecondRange,
                     type: 'date',
+                    tickfont: {
+                        size: getTickFontSize() // X-axis label font size
+                    },
                     fixedrange: true,
                     rangeslider: {
                         visible: false,
@@ -156,6 +171,9 @@ function fetchDataAndUpdateChart() {
                     ticks: 'outside',  // Optional: place ticks outside for better visibility
                     dtick: (data["price_second_range"][1] - data["price_second_range"][0]) / 6,  // Increase grid lines (10 grid lines)
                     type: 'linear',
+                    tickfont: {
+                        size: getTickFontSize() // X-axis label font size
+                    },
                     fixedrange: true,  // Prevent zooming on y-axis
                     showgrid: true,  // Ensure grid lines are visible
                 },
@@ -165,7 +183,7 @@ function fetchDataAndUpdateChart() {
 
 
             // Update the latest prices
-            updateLatestPrices(closePrices, data['timestamps'], data['time_60_seconds'][data['time_60_seconds'].length - 1  ], data['digit']);
+            updateLatestPrices(closePrices, data['timestamps'], data['time_60_seconds'][data['time_60_seconds'].length - 1], data['digit']);
             updateTransactionInfo(
                 closePrices[closePrices.length - 1],
                 data['current_time'],
@@ -270,7 +288,7 @@ function updateTransactionInfo(currentPrice, currentTime, settlementTime, orderD
     // Update the transaction info card
     document.getElementById('product-info').setAttribute('data-current-price', currentPrice);
     document.getElementById('product-info').setAttribute('data-current-price-digit', digit);
-    document.getElementById('current-price').textContent = `$${currentPrice}`;
+    document.getElementById('current-price').textContent = `$${currentPrice.toFixed(digit)}`;
     document.getElementById('current-time').textContent = currentLocalTime;
     document.getElementById('settlement-time').textContent = `${settlementLocalTime} -- (${timeToSettleMent})`;
     document.getElementById('order-deadline').textContent = `${orderDeadlineLocalTime} -- (${timeToOrderDeadline})`;
