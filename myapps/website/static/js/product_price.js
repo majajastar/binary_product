@@ -196,7 +196,11 @@ async function fetchOrderData() {
     try {
         const response = await fetch(`/get-order-data/${productType}/?page=${page}&current_price=${currentPrice}`);
         const data = await response.json();
-
+        const userFundsElement = document.getElementById('user_funds').querySelector('span');
+        userFundsElement.textContent = `$${data.funds.toFixed(6)}`; // Format to 6 decimal places
+        // Update the buy-down limit
+        const userBuyDownLimitElement = document.getElementById('user_buy_down_limit').querySelector('span');
+        userBuyDownLimitElement.textContent = `$${data.buy_down_limit.toFixed(6)}`; // Format to 6 decimal places
         renderOrderTable(data.orders, data.has_next, data.has_previous, data.digit);
     } catch (error) {
         console.error("Error fetching order data:", error);

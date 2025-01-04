@@ -166,6 +166,8 @@ def get_60_minute_data(current_time, product_type):
 def get_order_data(request, product_type="usd-eur"):
     if not request.user.is_authenticated:
         return JsonResponse({
+            "buy_down_limit" : 0,
+            "funds": 0,
             "orders": None,
             "has_next": None,
             "has_previous": None,
@@ -222,6 +224,8 @@ def get_order_data(request, product_type="usd-eur"):
     else:
         digit = 2
     return JsonResponse({
+        "buy_down_limit": request.user.buy_down_limit,
+        "funds": request.user.funds,
         "orders": page_obj.object_list,
         "has_next": page_obj.has_next(),
         "has_previous": page_obj.has_previous(),
