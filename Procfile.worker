@@ -1,0 +1,2 @@
+worker: celery -A binary_product worker --loglevel=info --logfile=/var/log/celery_worker.log 
+beat: celery -A binary_product beat --loglevel=info --logfile=/var/log/celery_beat.log

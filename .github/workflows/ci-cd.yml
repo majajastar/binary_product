@@ -65,12 +65,11 @@ jobs:
         pip install awsebcli
     
     # Deploy to EB Web
-    - name: Switch Procfile Submodule Branch to web
+    - name: Change to web procfile
       run: |
-        git submodule set-branch --branch web procfiles
-        git submodule update --remote procfiles
-        git add procfiles
-        git commit -m "Update submodule to web branch"
+        cp Procfile.web Procfile
+        git add Procfile
+        git commit -m "Update Web Procfile"
     - name: Init EB CLI
       run: |
         eb init --platform python-3.9 --region ap-southeast-1 binary-product
@@ -82,12 +81,11 @@ jobs:
         eb deploy 
 
     # Deploy to EB Worker
-    - name: Switch Procfile Submodule Branch to worker
+    - name: Change to worker procfile
       run: |
-        git submodule set-branch --branch worker procfiles
-        git submodule update --remote procfiles
+        cp Procfile.worker Procfile
         git add procfiles
-        git commit -m "Update submodule to web branch"
+        git commit -m "Update Worker Procfile"
     - name: Init EB CLI
       run: |
         eb init --platform python-3.9 --region ap-southeast-1 binary-product-worker
