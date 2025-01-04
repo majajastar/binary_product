@@ -5,6 +5,9 @@ from myapps.prices.models import MinutePrice, FiveMinutePrice, FifteenMinutePric
 import pandas as pd
 from functools import lru_cache
 from myapps.prices.management.commands.generate_prices import simulate_stock_price, simulate_stock_price_in_range
+import logging
+# Get a logger instance
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = "Generate day and minute price data for a given date range and store it in the database."
@@ -45,8 +48,9 @@ class Command(BaseCommand):
             close_price = hour_prices[-1]
             high_price = max(hour_prices)
             low_price = min(hour_prices)
-            print(timestamp, open_price, close_price, high_price, low_price)
-            hour_timestamps = pd.date_range(start=timestamp, end=timestamp_next, freq='H')  # Daily intervals
+            #print(timestamp, open_price, close_price, high_price, low_price)
+            hour_timestamps = pd.date_range(start=timestamp, end=timestamp_next, freq='h')  # Daily intervals
+            #continue
             #print(len(hour_timestamps), len(hour_prices))
             for i in range(len(hour_timestamps) - 1):
                 hour_timestamp = hour_timestamps[i]
@@ -64,4 +68,4 @@ class Command(BaseCommand):
                 timestamp=timestamp,
                 defaults={'open': open_price, 'high': high_price, 'low': low_price, 'close': close_price}
             )
-        self.stdout.write(self.style.SUCCESS(f"Successfully generated and stored day and hour price records for {range_days} days."))
+        logger.info("Successfully generated and stored day and hour price records for {range_days} days."))

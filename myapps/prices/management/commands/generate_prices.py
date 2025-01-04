@@ -19,7 +19,7 @@ def simulate_stock_price_in_range(timestamp, open, close, period):
         mul = i/(len(prices) - 1)
         prices_cor.append(p + diff * mul)
     # print("---", open_price,close_price,high_price,low_price, prices_cor[-2], seed)
-    return np.round(prices_cor,6).tolist()
+    return prices_cor
 
 @lru_cache(maxsize=128)
 def simulate_stock_price(timestamp, initial_price, mu, sigma, time_steps):
@@ -36,7 +36,7 @@ def simulate_stock_price(timestamp, initial_price, mu, sigma, time_steps):
         price = prices[-1] * np.exp((mu - 0.5 * sigma ** 2) * dt + sigma * epsilon[i] * np.sqrt(dt))
         prices.append(price)
     
-    return np.round(prices,6).tolist()
+    return prices
 
 class Command(BaseCommand):
     help = "Generate day and minute price data for a given date range and store it in the database."
@@ -151,7 +151,7 @@ class Command(BaseCommand):
                 # self.stdout.write(self.style.SUCCESS(f"Successfully generated and stored minute price records for {minute_timestamp}"))
             high_price = max(high_minutes)
             low_price = min(low_minutes)
-            print(open_price, close_price, high_price, low_price)
+            #(open_price, close_price, high_price, low_price)
             # Save daily price data (DayPrice)
             DayPrice.objects.update_or_create(
                 product_type=product_type,

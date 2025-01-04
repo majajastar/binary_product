@@ -201,4 +201,9 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'myapps.orders.tasks.check_and_settle_orders',  # Path to your Celery task
         'schedule': crontab(minute='0,5,10,15,20,25,30,35,40,45,50,55'),  # Run at 00, 05, 10, 15, ..., 55
     },
+    # New periodic task: Generate prices every 4 hours
+    'generate_prices_every_4_hours': {
+        'task': 'myapps.prices.tasks.generate_prices_task',  # Path to the Celery task
+        'schedule': crontab(hour='*/4', minute=2),  # Every 4 hours, at the 2th minute
+    },
 }
