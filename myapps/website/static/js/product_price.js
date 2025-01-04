@@ -244,7 +244,7 @@ function renderOrderTable(orders, hasNext, hasPrevious, digit) {
             <td>${settledAtLocal || "N/A"}</td>
             <td>${order.settled_price ? order.settled_price.toFixed(digit) : "N/A"}</td>
             <td>${order.status === "completed" ? "訂單完成" : "訂單成立"}</td>  <!-- Display the correct status text -->
-            <td style="color: ${profitColor}">${order.profit !== null ? `$${order.profit.toFixed(digit)}` : "N/A"}</td>
+            <td style="color: ${profitColor}">${order.profit !== null ? `$${order.profit.toFixed(digit)}` : "-"}</td>
         `;
 
         tableBody.appendChild(row);

@@ -184,8 +184,8 @@ def get_order_data(request, product_type="usd-eur"):
             profit = order.settled_price - order.price
             profit*=order.quantity
         else:
-            if current_price == 0:
-                profit = "-"
+            if current_price == "0":
+                profit = None
             else:
                 profit = float(current_price) - order.price
                 profit*=order.quantity
