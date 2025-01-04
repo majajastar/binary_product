@@ -102,6 +102,7 @@ async function fetchDataAndUpdateChart() {
                     dtick: (data["price_range"][1] - data["price_range"][0]) / 6,  // Increase grid lines (10 grid lines)
                     type: 'linear',
                 },
+                
             };
 
             var lineData = {
@@ -194,14 +195,14 @@ async function fetchOrderData() {
     const page = document.getElementById('product-info').getAttribute('data-current-page');
     const currentPrice = document.getElementById('product-info').getAttribute('data-current-price');
     try {
-        const response = await fetch(`/get-order-data/${productType}/?page=${page}&current_price=${currentPrice}`);
+        const response = await fetch(`/get-order-data/${productType}/?page=${page}`);
         const data = await response.json();
         const userFundsElement = document.getElementById('user_funds').querySelector('span');
         userFundsElement.textContent = `$${data.funds.toFixed(6)}`; // Format to 6 decimal places
         // Update the buy-down limit
         const userBuyDownLimitElement = document.getElementById('user_buy_down_limit').querySelector('span');
         userBuyDownLimitElement.textContent = `$${data.buy_down_limit.toFixed(6)}`; // Format to 6 decimal places
-        renderOrderTable(data.orders, data.has_next, data.has_previous, data.digit);
+        renderOrderTable(data.orders, data.has_next, data.has_previous);
     } catch (error) {
         console.error("Error fetching order data:", error);
     }
@@ -235,6 +236,7 @@ function renderOrderTable(orders, hasNext, hasPrevious, digit) {
         const timezoneOffset = new Date().getTimezoneOffset() * 60;
         const createdAtLocal = new Date(new Date(order.created_at).getTime()).toLocaleTimeString();
         const settledAtLocal = new Date(new Date(order.settled_at).getTime()).toLocaleTimeString();
+        const digit = order.digit
         row.innerHTML = `
             <td>${order.product}</td>
             <td>$${order.price.toFixed(digit)}</td>

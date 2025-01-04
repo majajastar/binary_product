@@ -86,7 +86,7 @@
         /* Align it to the right */
         width: 100px;
         /* Occupy only 50% of the screen width */
-        background: linear-gradient(135deg, #014b96, #6d91b3);
+        background: linear-gradient(135deg, #268bff, #6d91b3);
         /* dark blue gradient */
         box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
         /* Shadow for separation */
