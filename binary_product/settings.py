@@ -174,7 +174,10 @@ AUTH_USER_MODEL = 'users.User'  # Add this line in settings.py
 CELERY_TASK_DEFAULT_QUEUE = 'default'
 CELERY_LOGGER = logging.getLogger('celery')
 CELERY_LOGGER.setLevel(logging.INFO)
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'  # Use Redis as broker
+if os.getenv('DJANGO_DEBUG', 'False') == 'True':  # You can also use DEBUG directly if set
+    CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'  # Use Redis as broker
+else:
+    CELERY_BROKER_URL = os.getenv("REDIS_URL"),
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 

@@ -14,7 +14,3 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 # Autodiscover tasks in myapps.orders and all other apps listed in INSTALLED_APPS
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
-
-@app.task(bind=True)
-def debug_task(self):
-    print('Debug task executed!')

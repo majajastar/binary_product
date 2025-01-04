@@ -69,7 +69,7 @@ class Command(BaseCommand):
                 # Generate the high and low prices for the minute
                 high_minute = max(price,price_next) + max(np.random.normal(0, delta/ 5), 0)
                 low_minute = min(price,price_next) - max(np.random.normal(0, delta/5), 0)
-                print ("X:", price, price_next, high_minute, low_minute)
+                #print ("X:", price, price_next, high_minute, low_minute)
                 high_minutes.append(high_minute)
                 low_minutes.append(low_minute)
                 continue
@@ -120,7 +120,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f"Successfully generated and stored minute price records for {minute_timestamp}"))
             high_price = max(high_minutes)
             low_price = min(low_minutes)
-            print(start_price, close_price, high_price, low_price)
+            #print(start_price, close_price, high_price, low_price)
             # Save daily price data (DayPrice)
             DayPrice.objects.update_or_create(
                 product_type=product_type,

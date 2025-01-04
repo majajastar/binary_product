@@ -17,7 +17,7 @@ class LoginForm(AuthenticationForm):
 
     def clean(self):
         # Get the cleaned data
-        print("clean")
+        # print("clean")
         cleaned_data = super().clean()
         username = cleaned_data.get('username')
         password = cleaned_data.get('password')

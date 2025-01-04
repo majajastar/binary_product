@@ -6,13 +6,13 @@ from .models import User
 class CustomUserAdmin(UserAdmin):
     model = User
     # You can specify which fields to display on the user admin page
-    list_display = ('username', 'email', 'phone_number', 'funds')
+    list_display = ('username', 'email', 'phone_number', 'funds', 'buy_down_limit')
     list_filter = ('is_staff', 'is_active')
     search_fields = ('username', 'email')
     ordering = ('username',)
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('email', 'phone_number', 'funds')}),
+        ('Personal info', {'fields': ('email', 'phone_number', 'funds', 'buy_down_limit')}),
         # ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (

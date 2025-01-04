@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 def get_product_price_at_time(product_type, timestamp):
     try:
-        print(product_type, timestamp)
         price_entry = MinutePrice.objects.filter(product_type=product_type, timestamp__lte=timestamp).order_by('-timestamp').first()
         
         if price_entry:
@@ -30,31 +29,42 @@ def check_and_settle_orders():
     # Get all pending orders
     pending_orders = Order.objects.filter(status=Order.ACTIVED)
     datetime_now = timezone.now()
-    # Example: Settle orders if the deadline has passed
+    settled_count = 0
+
     for order in pending_orders:
-        # Here, implement your criteria for settling the orders.
-        # For example, if it's past the deadline, mark as settled:
+        # Retrieve the product price at settlement time
         product_price_at_settlement = get_product_price_at_time(order.product, order.settled_at)
-        if (not product_price_at_settlement):
+
+        if not product_price_at_settlement:
             order.settled_price = order.price
         else:
             order.settled_price = product_price_at_settlement
+
         user = order.user
+        quantity = order.quantity
         if order.direction == order.BUY_UP:
-            user.funds += order.settled_price
+            user.funds += order.settled_price * quantity
         else:
-            profit = (order.price - order.settled_price) * quantity
-            user.security_deposit -= order.price*quantity
-            user.funds += order.price*quantity
-            user.fund += profit
-        order.status = Order.COMPLETED  # Set to settle
+            user.buy_down_limit += order.price * quantity
+            user.funds -= order.settled_price * quantity
+        order.status = Order.COMPLETED  # Mark order as completed
         order.save()
+        user.save()
+        # Log info about the completed order
+        logger.info(
+            f"Order ID {order.id} settled:\n"
+            f"  User: {user.username}\n"
+            f"  User funds: {user.funds}\n"
+            f"  Product: {order.product}\n"
+            f"  Quantity: {quantity}\n"
+            f"  Direction: {'BUY_UP' if order.direction == order.BUY_UP else 'BUY_DOWN'}\n"
+            f"  Order Price: {order.price}\n"
+            f"  Settled Price: {order.settled_price}\n"
+            f"  Status: {order.status}"
+        )
 
-    return "Orders checked and settled"
+        settled_count += 1
+        user.save()
 
-
-@shared_task
-def debug_task():
-    datetime_now = timezone.now()
-    logger.info(datatime_now)
-    return "test"
+    logger.info(f"Task completed: {settled_count} orders settled.")
+    return f"Orders checked and settled: {settled_count}"

@@ -17,6 +17,12 @@ def create_order(request):
             current_time = timezone.now()
             minutes_to_next_settlement = 5 - (current_time.minute % 5)
             next_settlement_time = current_time + timedelta(minutes=minutes_to_next_settlement)
+            next_settlement_time = next_settlement_time.replace(second=0, microsecond=0)
+            order_deadline_time = next_settlement_time - timedelta(minutes=1)
+            # Check if the current time is after the order deadline
+            if current_time > order_deadline_time:
+                return JsonResponse({'success': False, 'error': '鎖單中，請等待下次交易時間'})
+
             data = json.loads(request.body)
             user = request.user  # Get the current logged-in user
             product_type = data.get('product_type')
@@ -24,16 +30,21 @@ def create_order(request):
             action = data.get('action')
             direction = Order.BUY_UP if action == "buy_up" else Order.BUY_DOWN
             quantity = data.get('quantity')
+
             # Check if user has enough funds
-            if user.funds < price*quantity:
+            if direction == Order.BUY_UP and user.funds < price * quantity:
                 return JsonResponse({'success': False, 'error': '餘額不足'})
+            elif direction == Order.BUY_DOWN and user.buy_down_limit < price * quantity:
+                return JsonResponse({'success': False, 'error': '買跌額度不足'}) 
+            
             # Deduct the price from the user's funds
             if direction == Order.BUY_UP:
-                user.funds -= price*quantity
+                user.funds -= price * quantity
             else:
-                user.security_deposit += price*quantity
-                user.funds -= price*quantity
+                user.buy_down_limit -= price * quantity
+                user.funds += price * quantity
             user.save()
+
             # Create an Order if the user has enough funds
             new_order = Order.objects.create(
                 user=user,
@@ -44,11 +55,11 @@ def create_order(request):
                 settled_at=next_settlement_time,
                 status=Order.ACTIVED  # Default status is 'pending'
             )
+
             redirect_url = reverse('product_page', kwargs={'product_type': product_type})
             return JsonResponse({'success': True, 'order_id': new_order.id, "redirect_url": redirect_url})
+
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Invalid request method.'})
-
-

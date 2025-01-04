@@ -79,10 +79,6 @@ def get_60_minute_data(current_time, product_type):
     high_prices = []
     low_prices = []
     
-    #print("current_time:", current_time)
-    #print("next_settlement_time:",next_settlement_time)
-    #print("order_deadline_time:",order_deadline_time)
-    
     for price in latest_60_minutes_records[::-1]:
         timestamps.append(price.timestamp)
         open_prices.append(price.open)
@@ -173,6 +169,7 @@ def get_order_data(request, product_type="usd-eur"):
             "orders": None,
             "has_next": None,
             "has_previous": None,
+            "digit": 2,
         })
     # Fetch the orders for the authenticated user and product
     orders = Order.objects.filter(user=request.user, product=product_type)
@@ -185,19 +182,21 @@ def get_order_data(request, product_type="usd-eur"):
             profit = order.settled_price - order.price
             profit*=order.quantity
         else:
-            profit = float(current_price) - order.price
-            profit*=order.quantity
+            if current_price == 0:
+                profit = "-"
+            else:
+                profit = float(current_price) - order.price
+                profit*=order.quantity
         if order.direction == order.BUY_DOWN:
             profit = profit * -1
-
         order_data.append({
             "id": order.id,
             "product": order.product,
             "price": order.price,
             "quantity": order.quantity,
             "direction": order.direction,
-            "created_at": order.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-            "settled_at": order.settled_at.strftime("%Y-%m-%d %H:%M:%S") if order.settled_at else None,
+            "created_at": order.created_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "settled_at": order.settled_at.strftime("%Y-%m-%dT%H:%M:%SZ") if order.settled_at else None,
             "settled_price": order.settled_price,
             "status": order.status,
             "profit": profit,
@@ -207,11 +206,26 @@ def get_order_data(request, product_type="usd-eur"):
     paginator = Paginator(order_data, 10)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-
+    digit = 6
+    if abs(profit) < 0.0001:
+        digit = 8
+    elif abs(profit) < 0.001:
+        digit = 7
+    elif abs(profit) < 0.01:
+        digit = 6
+    elif abs(profit) < 0.1:
+        digit = 5
+    elif abs(profit) < 1:
+        digit = 4
+    elif abs(profit) < 10:
+        digit = 3
+    else:
+        digit = 2
     return JsonResponse({
         "orders": page_obj.object_list,
         "has_next": page_obj.has_next(),
         "has_previous": page_obj.has_previous(),
+        "digit":digit,
     })
 
 

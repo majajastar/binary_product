@@ -1,11 +1,19 @@
-// Function to determine tick font size based on screen width
+// Utility Functions
 function getTickFontSize() {
-    return window.innerWidth < 992 ? 8 : 12; // Smaller font for screens narrower than 600px
+    return window.innerWidth < 992 ? 8 : 12;
 }
 
-// Function to fetch new data and update the chart
+function adjustToLocalTime(timestamps) {
+    const timezoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
+    return timestamps.map(ts => new Date(new Date(ts).getTime() - timezoneOffset).toISOString());
+}
 
-function fetchDataAndUpdateChart() {
+function formatTick(digit) {
+    return digit >= 3 && digit <= 8 ? `.${digit}f` : '.2f';
+}
+
+// Chart Update Functions
+async function fetchDataAndUpdateChart() {
     var productType = document.getElementById('product-info').getAttribute('data-product-type');
     fetch(`/get-product-data/${productType}/`)
         .then(response => response.json())
@@ -15,24 +23,10 @@ function fetchDataAndUpdateChart() {
             var timezoneOffset = new Date().getTimezoneOffset() * 60 * 1000;
 
             // Adjust timestamps to local time by adding the timezone offset
-            var localTimestamps = data['timestamps'].map(function (timestamp) {
-                // Convert to local time by adjusting with timezone offset
-                return new Date(new Date(timestamp).getTime() - timezoneOffset).toISOString();
-            });
-            var localSecondTimestamps = data['time_60_seconds'].map(function (timestamp) {
-                // Convert to local time by adjusting with timezone offset
-                return new Date(new Date(timestamp).getTime() - timezoneOffset).toISOString();
-            });
-
-            var localTimeRange = data["time_range"].map(function (timestamp) {
-                // Convert to local time by adjusting with timezone offset
-                return new Date(new Date(timestamp).getTime() - timezoneOffset).toISOString();
-            });
-
-            var localTimeSecondRange = data["time_second_range"].map(function (timestamp) {
-                // Convert to local time by adjusting with timezone offset
-                return new Date(new Date(timestamp).getTime() - timezoneOffset).toISOString();
-            });
+            var localTimestamps = adjustToLocalTime(data['timestamps']);
+            var localSecondTimestamps = adjustToLocalTime(data['time_60_seconds']);
+            var localTimeRange = adjustToLocalTime(data['time_range']);
+            var localTimeSecondRange = adjustToLocalTime(data['time_second_range']);
 
             var openPrices = data['open_prices'];
             var highPrices = data['high_prices'];
@@ -194,121 +188,134 @@ function fetchDataAndUpdateChart() {
         });
 }
 
-function fetchOrderData() {
-    var productType = document.getElementById('product-info').getAttribute('data-product-type');
-    var page = document.getElementById('product-info').getAttribute('data-current-page');
-    var current_price = document.getElementById('product-info').getAttribute('data-current-price');
-    var digit = document.getElementById('product-info').getAttribute('data-current-price-digit');
+// Order Data Update Functions
+async function fetchOrderData() {
+    const productType = document.getElementById('product-info').getAttribute('data-product-type');
+    const page = document.getElementById('product-info').getAttribute('data-current-page');
+    const currentPrice = document.getElementById('product-info').getAttribute('data-current-price');
+    try {
+        const response = await fetch(`/get-order-data/${productType}/?page=${page}&current_price=${currentPrice}`);
+        const data = await response.json();
 
-    fetch(`/get-order-data/${productType}/?page=${page}&current_price=${current_price}`)
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.querySelector("table tbody");
-            if (tableBody) {
-                tableBody.innerHTML = "";  // Clear current table rows
-
-                data.orders.forEach(order => {
-                    if (order) {
-                        const row = document.createElement("tr");
-                        // Check profit value and apply color
-                        let profitColor = order.profit > 0 ? 'red' : (order.profit < 0 ? 'green' : 'black');
-
-                        // If order status is "Completed", set row background to gray
-                        if (order.status === "Completed") {
-                            row.style.backgroundColor = "gray";
-                        }
-
-                        row.innerHTML = `
-                            <td>${order.id}</td>
-                            <td>${order.product}</td>
-                            <td>$${order.price.toFixed(digit)}</td>
-                            <td>${order.quantity}</td>
-                            <td>${order.direction}</td>
-                            <td>${order.created_at}</td>
-                            <td>${order.settled_at || "N/A"}</td>
-                            <td>${order.settled_price || "N/A"}</td>
-                            <td>${order.status}</td>
-                            <td style="color: ${profitColor}">${order.profit !== null ? `$${order.profit.toFixed(digit)}` : "<span class='text-muted'>N/A</span>"}</td>
-                        `;
-                        tableBody.appendChild(row);
-                    }
-                });
-
-                // Update pagination controls (if applicable)
-                document.querySelector("#next-page").disabled = !data.has_next;
-                document.querySelector("#previous-page").disabled = !data.has_previous;
-            }
-        })
-        .catch(error => console.error("Error fetching order data:", error));
+        renderOrderTable(data.orders, data.has_next, data.has_previous, data.digit);
+    } catch (error) {
+        console.error("Error fetching order data:", error);
+    }
 }
 
+function renderOrderTable(orders, hasNext, hasPrevious, digit) {
+    const tableBody = document.querySelector("table tbody");
+    if (!tableBody) return;
 
+    tableBody.innerHTML = ""; // Clear existing rows
 
-// Function to update the latest 5 prices in the second card
+    orders.forEach(order => {
+        const row = document.createElement("tr");
+        row.style.backgroundColor = order.status === "completed" ? "#E3E3E3" : "white";
+
+        // Determine the direction label and color
+        let directionLabel = "";
+        let directionColor = "";
+        if (order.direction === "buy_up") {
+            directionLabel = "買漲";
+            directionColor = "red";
+        } else if (order.direction === "buy_down") {
+            directionLabel = "買跌";
+            directionColor = "green";
+        }
+
+        // Set profit color
+        const profitColor = order.profit > 0 ? 'red' : order.profit < 0 ? 'green' : 'black';
+
+        // Convert created_at to local time zone
+        const timezoneOffset = new Date().getTimezoneOffset() * 60;
+        const createdAtLocal = new Date(new Date(order.created_at).getTime()).toLocaleTimeString();
+        const settledAtLocal = new Date(new Date(order.settled_at).getTime()).toLocaleTimeString();
+        row.innerHTML = `
+            <td>${order.product}</td>
+            <td>$${order.price.toFixed(digit)}</td>
+            <td>${order.quantity}</td>
+            <td style="color: ${directionColor}">${directionLabel}</td>
+            <td>${createdAtLocal}</td>  <!-- Local timestamp here -->
+            <td>${settledAtLocal || "N/A"}</td>
+            <td>${order.settled_price ? order.settled_price.toFixed(digit) : "N/A"}</td>
+            <td>${order.status === "completed" ? "訂單完成" : "訂單成立"}</td>  <!-- Display the correct status text -->
+            <td style="color: ${profitColor}">${order.profit !== null ? `$${order.profit.toFixed(digit)}` : "N/A"}</td>
+        `;
+
+        tableBody.appendChild(row);
+    });
+
+    document.querySelector("#next-page").disabled = !hasNext;
+    document.querySelector("#previous-page").disabled = !hasPrevious;
+}
+
+// UI Update Functions
 function updateLatestPrices(prices, timestamps, current_time, digit) {
     const latestPricesList = document.getElementById('latest-prices');
-    latestPricesList.innerHTML = ''; // Clear previous entries
+    latestPricesList.innerHTML = '';
 
-    // Get the latest 5 prices
     const latestPrices = prices.slice(-5).reverse();
-    var latestTimestamps = timestamps.slice(-4);
-    latestTimestamps.push(current_time);
-    latestTimestamps = latestTimestamps.reverse();
+    const latestTimestamps = [...timestamps.slice(-4), current_time].reverse();
+
     latestPrices.forEach((price, index) => {
         const listItem = document.createElement('li');
         listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
         listItem.innerHTML = `
             <span>${new Date(latestTimestamps[index]).toLocaleString()}</span>
-            <span class="badge bg-primary rounded-pill">$${price.toFixed(digit)}</span>
+            <span class="badge bg-primary rounded-pill ms-2">$${price.toFixed(digit)}</span>
         `;
         latestPricesList.appendChild(listItem);
     });
 }
 
-// Function to update the transaction info card with current price, time, and deadlines
 function updateTransactionInfo(currentPrice, currentTime, settlementTime, orderDeadline, digit) {
-    const settlementLocalTime = new Date(settlementTime).toLocaleTimeString();
-    const orderDeadlineLocalTime = new Date(orderDeadline).toLocaleTimeString();
-    const currentLocalTime = new Date(currentTime).toLocaleTimeString();
-
-    // Calculate the time difference to settlement in seconds
-    const timeToSettleMentDiff = Math.max(0, Math.floor((new Date(settlementTime) - new Date(currentTime)) / 1000)); // in seconds
-    // Convert time difference to minute:second format for settlement time
-    const minutesToSettleMent = Math.floor(timeToSettleMentDiff / 60);
-    const secondsToSettleMent = timeToSettleMentDiff % 60;
-    const timeToSettleMent = `${minutesToSettleMent}:${secondsToSettleMent < 10 ? '0' + secondsToSettleMent : secondsToSettleMent}`;
-
-    // Calculate the time difference to order deadline in seconds
-    const timeToOrderDeadlineDiff = Math.max(0, Math.floor((new Date(orderDeadline) - new Date(currentTime)) / 1000)); // in seconds
-    // Convert time difference to minute:second format for order deadline
-    const minutesToOrderDeadline = Math.floor(timeToOrderDeadlineDiff / 60);
-    const secondsToOrderDeadline = timeToOrderDeadlineDiff % 60;
-    const timeToOrderDeadline = `${minutesToOrderDeadline}:${secondsToOrderDeadline < 10 ? '0' + secondsToOrderDeadline : secondsToOrderDeadline}`;
-
-    // Update the transaction info card
+    const formatTime = (time) => new Date(time).toLocaleTimeString();
+    const calculateTimeDiff = (end, start) => Math.max(0, Math.floor((new Date(end) - new Date(start)) / 1000));
+    const formatTimeDiff = (seconds) => `${Math.floor(seconds / 60)}:${seconds % 60 < 10 ? '0' : ''}${seconds % 60}`;
     document.getElementById('product-info').setAttribute('data-current-price', currentPrice);
     document.getElementById('product-info').setAttribute('data-current-price-digit', digit);
     document.getElementById('current-price').textContent = `$${currentPrice.toFixed(digit)}`;
-    document.getElementById('current-time').textContent = currentLocalTime;
-    document.getElementById('settlement-time').textContent = `${settlementLocalTime} -- (${timeToSettleMent})`;
-    document.getElementById('order-deadline').textContent = `${orderDeadlineLocalTime} -- (${timeToOrderDeadline})`;
+    document.getElementById('current-time').textContent = formatTime(currentTime);
+    document.getElementById('settlement-time').textContent = `${formatTime(settlementTime)} -- (${formatTimeDiff(calculateTimeDiff(settlementTime, currentTime))})`;
+    document.getElementById('order-deadline').textContent = `${formatTime(orderDeadline)} -- (${formatTimeDiff(calculateTimeDiff(orderDeadline, currentTime))})`;
 }
 
+// Trade Type Handling
+function updateTradeType() {
+    const toggle = document.getElementById("tradeToggle");
+    const label = document.getElementById("tradeTypeLabel");
+    const expectedValue = document.getElementById("expected-value");
+    const type = toggle.checked ? "buy_down" : "buy_up";
+
+    // Update the text and color for the trade type label
+    if (toggle.checked) {
+        label.textContent = "買跌";
+        label.style.color = "green"; // Set color to green for 買跌
+        expectedValue.style.color = "green"; // Set expected value color to green for 買跌
+    } else {
+        label.textContent = "買漲";
+        label.style.color = "red"; // Set color to red for 買漲
+        expectedValue.style.color = "red"; // Set expected value color to red for 買漲
+    }
+
+    expectedValue.textContent = calculateExpectedValue(type);
+}
+
+
+function calculateExpectedValue(type) {
+    const quantity = parseInt(document.getElementById("trade-quantity").value, 10) || 1000;
+    const currentPrice = parseFloat(document.getElementById('current-price').innerText.replace('$', ''));
+    return `$${(quantity * currentPrice).toFixed(6)}`;
+}
 
 // Handle the "Buy Up" button click
 // Reusable function to handle "Buy" actions
 function handleBuyAction(action) {
     const currentUser = "{{ user.username }}";  // Use Django template tag to pass current user
-    const productType = "usd-eur";  // Adjust based on your product
+    const productType = document.getElementById('product-info').getAttribute('data-product-type');
     const currentPrice = document.getElementById('current-price').innerText.replace('$', ''); // Get the current price
-    var quantity = 100; // Default quantity
-    if (action === "buy_up") {
-        // Get the quantity from the buy-up input field
-        quantity = parseInt(document.getElementById("buy-up-quantity").value) || 100; // Default to 100 if the value is not a number
-    } else if (action === "buy_down") {
-        // Get the quantity from the buy-down input field
-        quantity = parseInt(document.getElementById("buy-down-quantity").value) || 100; // Default to 100 if the value is not a number
-    }
+    const quantity = parseInt(document.getElementById("trade-quantity").value, 10) || 1000;
     // Make the AJAX request to create an order
     fetch('/create-order/', {
         method: 'POST',
@@ -336,6 +343,15 @@ function handleBuyAction(action) {
         .catch(error => console.error('错误:', error));  // Error in simplified Chinese
 }
 
+function placeOrder() {
+    const toggle = document.getElementById("tradeToggle");
+    if (toggle.checked) {
+        handleBuyAction('buy_down');
+    } else {
+        handleBuyAction('buy_up');
+    }
+}
+
 function fetchOrderDataByPrevPage() {
     var page = parseInt(document.getElementById('product-info').getAttribute('data-current-page'), 10);
     document.getElementById('product-info').setAttribute('data-current-page', page - 1);
@@ -349,12 +365,12 @@ function fetchOrderDataByNextPage() {
     fetchOrderData();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Set interval to update the chart and latest prices every second
+// Event Listeners
+document.addEventListener('DOMContentLoaded', async () => {
     setInterval(fetchDataAndUpdateChart, 1000);
-    setInterval(fetchOrderData, 1000)
+    setInterval(fetchOrderData, 1000);
 
-    // Call initially to render the chart and prices immediately
-    fetchDataAndUpdateChart();
-
+    await fetchDataAndUpdateChart();
+    await fetchOrderData();
+    updateTradeType();
 });
