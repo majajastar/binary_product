@@ -24,12 +24,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Set Git user identity
-    - name: Set Git User Identity
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-
     # Set up Python
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -55,6 +49,12 @@ jobs:
     # Checkout the code again in the deploy job
     - name: Checkout code
       uses: actions/checkout@v3
+
+    # Set Git user identity
+    - name: Set Git User Identity
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
 
     # Set up AWS CLI
     - name: Set up AWS CLI
