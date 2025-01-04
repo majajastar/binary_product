@@ -8,7 +8,7 @@ from myapps.prices.models import MinutePrice
 from myapps.orders.models import Order
 from django.core.paginator import Paginator
 from .models import ContactMethod
-from myapps.prices.management.commands.generate_prices import simulate_stock_price
+from myapps.prices.management.commands.generate_prices import simulate_stock_price_in_range
 from functools import lru_cache
 
 def get_order_page_obj(user, product, page_number=1):
@@ -74,9 +74,6 @@ def get_current_price(current_time, product_type):
     
 @lru_cache(maxsize=256)
 def get_60_seconds_data(timestamp, product_type):
-    # print("---", timestamp, timestamp.replace(second=0),int(timestamp.replace(second=0).timestamp()))
-    seed = int(timestamp.replace(second=0).timestamp())
-    np.random.seed(seed)  # Set seed for reproducibility
     # Query the records where product_type is 'usd-eur' and within the last 60 minutes
     price = MinutePrice.objects.filter(product_type=product_type, timestamp__lte=timestamp).order_by('-timestamp')[0]
 
@@ -84,39 +81,10 @@ def get_60_seconds_data(timestamp, product_type):
     close_price = price.close
     high_price = price.high
     low_price = price.low
-    periods = 60
-    # Time increments
-    dt = 1 / periods  # Assuming normalized time
+    periods = 61
     
-    drift = (close_price-open_price)/open_price
-    volatility = drift*5
-    
-    # Simulate Brownian motion
-    prices = [open_price]
-    for t in range(periods):
-        # Calculate random change
-        random_shock = np.random.normal(0, 1) * np.sqrt(dt)
-        drift_adjustment = drift * dt
-        stochastic_part = volatility * random_shock
-        
-        # Update price
-        next_price = prices[-1] * np.exp(drift_adjustment + stochastic_part)
-        
-        # Clip to max/min price
-        next_price = np.clip(next_price, low_price, high_price)
-        prices.append(next_price)
-    
-    # Adjust to trend towards close_price
-    scaling_factor = close_price / prices[-1]
-    
-    prices_cor = []
-    for i,p in enumerate(prices):
-        p_scaled = p * scaling_factor
-        diff = p_scaled - p
-        mul = i/(len(prices) - 1)
-        prices_cor.append(p + diff * mul)
-    # print("---", open_price,close_price,high_price,low_price, prices_cor[-2], seed)
-    return prices_cor[:-1]
+    prices = simulate_stock_price_in_range(timestamp,open_price, close_price, periods)
+    return prices[:-1]
 
 # Generate random stock data
 def get_60_minute_data(current_time, product_type):
@@ -256,7 +224,6 @@ def get_product_data(request, product_type):
     #print(product_type)
     current_time = timezone.now()
     data = get_60_minute_data(current_time, product_type)
-    #print(data)
     return JsonResponse(data)
 
 def product_page(request, product_type="usd-eur"):

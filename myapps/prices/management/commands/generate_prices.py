@@ -5,10 +5,29 @@ from myapps.prices.models import MinutePrice, FiveMinutePrice, FifteenMinutePric
 import pandas as pd
 from functools import lru_cache
 
+def simulate_stock_price_in_range(timestamp, open, close, period):
+    seed = int(timestamp.replace(second=0).timestamp())
+    rng = np.random.default_rng(seed)
+    mu = (close-open)/open
+    sigma = mu * rng.uniform(0, 1)
+    prices = simulate_stock_price(timestamp, open, mu, sigma, period)
+    scaling_factor = close/prices[-1]
+    prices_cor = []
+    for i,p in enumerate(prices):
+        p_scaled = p * scaling_factor
+        diff = p_scaled - p
+        mul = i/(len(prices) - 1)
+        prices_cor.append(p + diff * mul)
+    # print("---", open_price,close_price,high_price,low_price, prices_cor[-2], seed)
+    return np.round(prices_cor,6).tolist()
+
 @lru_cache(maxsize=128)
-def simulate_stock_price(initial_price, mu, sigma, time_steps, dt=1):
+def simulate_stock_price(timestamp, initial_price, mu, sigma, time_steps):
     # Generate random walk (random noise)
-    epsilon = np.random.normal(0, 1, time_steps)
+    seed = int(timestamp.replace(second=0).timestamp())
+    rng = np.random.default_rng(seed)
+    dt = 1/time_steps
+    epsilon = rng.normal(0, 1, time_steps)
     # List to store the stock prices
     prices = [initial_price]
     # Simulate the stock price over time
@@ -17,7 +36,7 @@ def simulate_stock_price(initial_price, mu, sigma, time_steps, dt=1):
         price = prices[-1] * np.exp((mu - 0.5 * sigma ** 2) * dt + sigma * epsilon[i] * np.sqrt(dt))
         prices.append(price)
     
-    return np.round(prices,6)
+    return np.round(prices,6).tolist()
 
 class Command(BaseCommand):
     help = "Generate day and minute price data for a given date range and store it in the database."
