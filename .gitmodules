@@ -1,0 +1,4 @@
+[submodule "procfiles"]
+	path = procfiles
+	url = https://github.com/majajastar/binary-product-procfile.git
+	branch = web

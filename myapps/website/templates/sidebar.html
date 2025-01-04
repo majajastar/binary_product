@@ -7,8 +7,8 @@
         <!-- Display user funds -->
         <p class="" style="font-size: 1rem;">用戶: <span class="font-italic">{{ user.username }}</span></p>
         
-        <p class="" style="font-size: 1rem;">買跌額度: <span class="font-weight-bold text-success">${{ user.buy_down_limit|format_decimal:6 }}</span></p>
-        <p class="" style="font-size: 1rem;">餘額: <span class="font-weight-bold text-danger">${{ user.funds|format_decimal:6 }}</span></p>
+        <p id = "user_buy_down_limit" class="" style="font-size: 1rem;">買跌額度: <span class="font-weight-bold text-success">${{ user.buy_down_limit|format_decimal:6 }}</span></p>
+        <p id = "user_funds" class="" style="font-size: 1rem;">餘額: <span class="font-weight-bold text-danger">${{ user.funds|format_decimal:6 }}</span></p>
         
     </div>
     {% endif %}
