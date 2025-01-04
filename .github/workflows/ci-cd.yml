@@ -90,7 +90,7 @@ jobs:
     - name: Change to worker procfile
       run: |
         cp Procfile.worker Procfile
-        git add procfiles
+        git add Procfile
         git commit -m "Update Worker Procfile"
     - name: Init EB CLI
       run: |
