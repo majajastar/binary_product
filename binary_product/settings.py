@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_celery_beat',
+    'django_celery_results',
     'myapps.website',
     'myapps.orders',
     'myapps.prices',
@@ -171,13 +172,27 @@ AUTH_USER_MODEL = 'users.User'  # Add this line in settings.py
 
 
 # Celery settings
+# Celery configuration
+CELERY_BROKER_URL = 'sqs://'
+CELERY_RESULT_BACKEND = 'django-db'  # Or use Redis, etc., based on your configuration.
+
+# AWS SQS Configuration
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')  # or from environment variables
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_REGION = 'us-east-1'  # Update to your AWS region
 CELERY_TASK_DEFAULT_QUEUE = 'default'
+CELERY_TASK_DEFAULT_EXCHANGE = 'default'
+CELERY_TASK_DEFAULT_ROUTING_KEY = 'default'
+
+# You can configure your queues if needed:
+CELERY_QUEUES = {
+    'default': {
+        'exchange': 'default',
+        'routing_key': 'default',
+    },
+}
 CELERY_LOGGER = logging.getLogger('celery')
 CELERY_LOGGER.setLevel(logging.INFO)
-if os.getenv('DJANGO_DEBUG', 'False') == 'True':  # You can also use DEBUG directly if set
-    CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'  # Use Redis as broker
-else:
-    CELERY_BROKER_URL = os.getenv("REDIS_URL"),
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
