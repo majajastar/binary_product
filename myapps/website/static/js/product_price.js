@@ -39,15 +39,16 @@ async function fetchDataAndUpdateChart() {
                 low: lowPrices,
                 open: openPrices,
                 close: closePrices,
-                decreasing: { line: { color: '#dc3545' } },
-                increasing: { line: { color: '#28a745' } },
+                decreasing: { line: { color: '#039003' } },
+                increasing: { line: { color: '#f30303' } },
                 line: {
                     color: 'rgba(31,119,180,1)',
                     width: 1,
                 },
                 type: 'candlestick',
                 xaxis: 'x',
-                yaxis: 'y'
+                yaxis: 'y',
+                name: '價格走勢',
             };
             var tickformat = '.6f'
             if (data['digit'] === 8) {
@@ -102,7 +103,17 @@ async function fetchDataAndUpdateChart() {
                     dtick: (data["price_range"][1] - data["price_range"][0]) / 6,  // Increase grid lines (10 grid lines)
                     type: 'linear',
                 },
-                
+                annotations: [
+                    {
+                      x: localTimestamps[localTimestamps.length - 1],
+                      y: data['close_prices'][data['close_prices'].length - 1],
+                      xref: 'x',
+                      yref: 'y',
+                      text: data['close_prices'][data['close_prices'].length - 1].toFixed(data['digit']),
+                      showarrow: false,
+                      yshift: 20,  // Move the annotation 20 pixels upward
+                    }
+                  ]
             };
 
             var lineData = {
@@ -114,7 +125,7 @@ async function fetchDataAndUpdateChart() {
                 },
                 type: 'scatter',
                 mode: 'lines',
-                name: '即時走勢'
+                name: '即時走勢',
             };
 
             var config = {
@@ -172,6 +183,17 @@ async function fetchDataAndUpdateChart() {
                     fixedrange: true,  // Prevent zooming on y-axis
                     showgrid: true,  // Ensure grid lines are visible
                 },
+                annotations: [
+                    {
+                      x: localSecondTimestamps[localSecondTimestamps.length - 1],
+                      y: data['price_60_second'][data['price_60_second'].length - 1],
+                      xref: 'x',
+                      yref: 'y',
+                      text: data['price_60_second'][data['price_60_second'].length - 1].toFixed(data['digit']),
+                      showarrow: false,
+                      yshift: 20,  // Move the annotation 20 pixels upward
+                    }
+                  ]
             };
 
             Plotly.react('chart-second', [lineDataInSeconds], layoutInSecond, config);
@@ -197,12 +219,15 @@ async function fetchOrderData() {
     try {
         const response = await fetch(`/get-order-data/${productType}/?page=${page}`);
         const data = await response.json();
-        const userFundsElement = document.getElementById('user_funds').querySelector('span');
-        userFundsElement.textContent = `$${data.funds.toFixed(6)}`; // Format to 6 decimal places
-        // Update the buy-down limit
-        const userBuyDownLimitElement = document.getElementById('user_buy_down_limit').querySelector('span');
-        userBuyDownLimitElement.textContent = `$${data.buy_down_limit.toFixed(6)}`; // Format to 6 decimal places
-        renderOrderTable(data.orders, data.has_next, data.has_previous);
+        if (data.auth_user){
+            const userFundsElement = document.getElementById('user_funds').querySelector('span');
+            userFundsElement.textContent = `$${data.funds.toFixed(6)}`; // Format to 6 decimal places
+            // Update the buy-down limit
+            const userBuyDownLimitElement = document.getElementById('user_buy_down_limit').querySelector('span');
+            userBuyDownLimitElement.textContent = `$${data.buy_down_limit.toFixed(6)}`; // Format to 6 decimal places
+            renderOrderTable(data.orders, data.has_next, data.has_previous);
+        }
+
     } catch (error) {
         console.error("Error fetching order data:", error);
     }

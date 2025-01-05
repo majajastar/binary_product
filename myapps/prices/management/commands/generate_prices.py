@@ -5,7 +5,8 @@ from myapps.prices.models import MinutePrice, FiveMinutePrice, FifteenMinutePric
 import pandas as pd
 from functools import lru_cache
 
-def simulate_stock_price_in_range(timestamp, open, close, period):
+@lru_cache(maxsize=128)
+def simulate_stock_price_in_range(timestamp, open, close, period, random_stable = False):
     seed = int(timestamp.replace(second=0).timestamp())
     rng = np.random.default_rng(seed)
     mu = (close-open)/open
@@ -19,7 +20,17 @@ def simulate_stock_price_in_range(timestamp, open, close, period):
         mul = i/(len(prices) - 1)
         prices_cor.append(p + diff * mul)
     # print("---", open_price,close_price,high_price,low_price, prices_cor[-2], seed)
-    return prices_cor
+    if random_stable:
+        prices_random_stable = []
+        while len(prices_random_stable) < period:
+            i = len(prices_random_stable)
+            repeat = rng.integers(1,10)
+            while repeat > 0 and len(prices_random_stable) < period:
+                prices_random_stable.append(prices_cor[i])
+                repeat -= 1
+        return prices_random_stable  
+    else:
+        return prices_cor
 
 @lru_cache(maxsize=128)
 def simulate_stock_price(timestamp, initial_price, mu, sigma, time_steps):

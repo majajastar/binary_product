@@ -83,7 +83,7 @@ def get_60_seconds_data(timestamp, product_type):
     low_price = price.low
     periods = 61
     
-    prices = simulate_stock_price_in_range(timestamp,open_price, close_price, periods)
+    prices = simulate_stock_price_in_range(timestamp,open_price, close_price, periods, True)
     return prices[:-1]
 
 # Generate random stock data
@@ -198,6 +198,7 @@ def get_60_minute_data(current_time, product_type):
 def get_order_data(request, product_type="usd-eur"):
     if not request.user.is_authenticated:
         return JsonResponse({
+            "auth_user": False,
             "buy_down_limit" : 0,
             "funds": 0,
             "orders": None,
@@ -210,6 +211,7 @@ def get_order_data(request, product_type="usd-eur"):
     page_obj = get_order_page_obj(request.user, product_type, request.GET.get('page', 1))
 
     return JsonResponse({
+        "auth_user": True,
         "buy_down_limit": request.user.buy_down_limit,
         "funds": request.user.funds,
         "orders": page_obj.object_list,

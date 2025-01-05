@@ -57,9 +57,11 @@
                             當前價格: <span id="current-price" class="text-danger">$0.00</span> (<span
                                 id="current-time">--:--</span>)
                         </p>
+                        {% if user.is_authenticated %}
                         <p class="card-text mb-1 text-muted">
                             可用資金: <span id="current-price" class="text-danger">${{user.funds}}</span>
                         </p>
+                        {% endif%}
                         <p class="card-text text-muted">
                             下單截止時間: <span id="order-deadline">--:--</span><br>
                             下次結算時間: <span id="settlement-time">--:--</span>
